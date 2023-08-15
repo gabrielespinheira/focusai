@@ -1,10 +1,10 @@
 'use client'
 
-import { FaRobot } from 'react-icons/fa'
+import { useState } from 'react'
+import { FaRobot, FaUser } from 'react-icons/fa'
 import { FiSend } from 'react-icons/fi'
 import { useChat } from 'ai/react'
-import colors from 'tailwindcss/colors'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -15,50 +15,64 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
-import { ScrollArea } from './ui/scroll-area'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 export default function Chat() {
+  const [model, setModel] = useState('gpt-4')
   const { messages, input, handleInputChange, handleSubmit, isLoading } =
     useChat({
       api: '/api/chat',
+      body: {
+        model,
+      },
     })
 
   return (
-    <Card className="w-[440px]">
+    <Card className="flex flex-col w-full">
       <CardHeader>
-        <CardTitle>Chat AI</CardTitle>
+        <CardTitle>Focus AI</CardTitle>
         <CardDescription>
-          Using Vercel SDK to create a chat bot.
+          Chatbot AI to help you <b>focus</b>, increase your <b>productivity</b>{' '}
+          and <b>achieve more</b> in your everyday life.
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ScrollArea className="h-[600px] w-full pr-4">
+      <CardContent className="flex-1">
+        <ScrollArea
+          className="w-full pr-4"
+          style={{ height: 'calc(100vh - 32px - 32px - 98px - 90px)' }}
+        >
           {!messages.length && <h1>Send your first message</h1>}
 
           {messages.map((message) => {
             return (
               <div
                 key={message.id}
-                className="flex gap-2 text-slate-600 text-sm mb-4"
+                className={`relative flex gap-4 text-slate-600 ${
+                  message.role === 'assistant' ? 'bg-slate-100' : 'bg-slate-300'
+                } rounded-lg px-4 py-2 pt-10 mt-6 mb-2`}
               >
-                {message.role === 'user' && (
-                  <Avatar>
-                    <AvatarFallback>GE</AvatarFallback>
-                    <AvatarImage src="https://github.com/gabrielespinheira.png" />
-                  </Avatar>
-                )}
-
                 {message.role === 'assistant' && (
-                  <div className="flex bg-slate-200 rounded-full w-12 h-12 justify-center items-center">
-                    <FaRobot size={24} fill={colors.blue[600]} />
+                  <div className="absolute top-[-12px] left-3 flex bg-primary text-primary-foreground rounded-full w-12 h-12 justify-center items-center">
+                    <FaRobot size={24} />
                   </div>
                 )}
-                <p className="leading-relaxed">
-                  <span className="block font-bold text-slate-800">
-                    {message.role === 'user' ? 'User' : 'Bot'}
-                  </span>
-                  {message.content}
-                </p>
+
+                {message.role !== 'assistant' && (
+                  <div className="absolute top-[-12px] left-3 flex bg-primary text-primary-foreground rounded-full w-12 h-12 justify-center items-center">
+                    <FaUser size={24} />
+                  </div>
+                )}
+
+                <p className="leading-relaxed flex-1">{message.content}</p>
               </div>
             )
           })}
@@ -71,6 +85,18 @@ export default function Chat() {
             value={input}
             onChange={handleInputChange}
           />
+          <Select defaultValue={model} onValueChange={(e) => setModel(e)}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Model" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Model</SelectLabel>
+                <SelectItem value="gpt-3">GPT-3</SelectItem>
+                <SelectItem value="gpt-4">GPT-4</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           <Button disabled={isLoading} type="submit">
             <FiSend size={16} />
           </Button>

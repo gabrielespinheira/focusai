@@ -18,6 +18,8 @@ export async function POST(req: Request) {
     messages,
   })
 
+  // console.log('🔥', response)
+
   const stream = OpenAIStream(response)
   return new StreamingTextResponse(stream)
 }
